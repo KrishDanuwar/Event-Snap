@@ -33,6 +33,7 @@ export interface GuestSummary {
   photoCount: number;
   joinedAt: string;
   isRemoved: boolean;
+  consentedAt: string | null;
 }
 
 export interface JoinResponse {

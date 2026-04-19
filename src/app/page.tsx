@@ -8,86 +8,40 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
-        padding: '2rem',
-        textAlign: 'center',
-      }}
-    >
-      {/* Logo / Brand */}
-      <div
-        style={{
-          fontSize: 64,
-          marginBottom: 16,
-        }}
-      >
-        📸
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-6 text-center">
+      
+      {/* Decorative Blur Background */}
+      <div className="absolute top-0 -z-10 h-full w-full bg-white">
+        <div className="absolute bottom-auto left-auto right-0 top-0 h-[500px] w-[500px] -translate-x-[30%] translate-y-[20%] rounded-full bg-primary/5 opacity-50 blur-[80px]"></div>
       </div>
 
-      <h1
-        style={{
-          fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-          fontWeight: 800,
-          background: 'linear-gradient(135deg, #6366f1, #00d4aa)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: 12,
-          letterSpacing: '-0.03em',
-        }}
-      >
-        EventSnap
-      </h1>
+      {/* Hero Content */}
+      <div className="animate-slide-up space-y-6 max-w-2xl">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 text-primary shadow-sm border border-primary/20">
+          <span className="text-4xl">📸</span>
+        </div>
 
-      <p
-        style={{
-          fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-          color: '#a0a0b0',
-          maxWidth: 500,
-          lineHeight: 1.6,
-          marginBottom: 32,
-        }}
-      >
-        Live event photo sharing. Scan, snap, share — no app install required.
-      </p>
+        <h1 className="text-5xl font-extrabold tracking-tight text-foreground sm:text-7xl">
+          Event<span className="text-primary">Snap</span>
+        </h1>
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Link
-          href="/admin"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '14px 28px',
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            color: '#fff',
-            borderRadius: 12,
-            textDecoration: 'none',
-            fontWeight: 600,
-            fontSize: 16,
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.3)',
-          }}
-        >
-          🔐 Admin Dashboard
-        </Link>
+        <p className="text-lg text-muted-foreground sm:text-xl leading-relaxed max-w-[500px] mx-auto">
+          Live event photo sharing made seamless. Scan, snap, and share — no app install required.
+        </p>
+
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            href="/admin"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            Admin Dashboard
+          </Link>
+        </div>
       </div>
 
       {/* Footer */}
-      <p
-        style={{
-          position: 'absolute',
-          bottom: 24,
-          color: '#555',
-          fontSize: 13,
-        }}
-      >
-        EventSnap v0.1.0 — Phase 0 Complete
+      <p className="absolute bottom-6 text-sm text-muted-foreground font-medium">
+        EventSnap v0.1.0 — Phase 0
       </p>
     </div>
   );

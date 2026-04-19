@@ -5,23 +5,27 @@ import { createAdminClient } from '@/lib/supabase/server';
 export async function POST(request: Request) {
   try {
     const token = getSessionTokenOrThrow(request);
-    
-    // Assert user is valid
-    const guest = await validateGuestSession(token);
+    await validateGuestSession(token); // Validates guest is active
 
-    const supabaseAdmin = createAdminClient();
-    
-    // Update consented_at timestamp
-    const { error } = await supabaseAdmin
-      .from('guests')
-      .update({ consented_at: new Date().toISOString() })
-      .eq('id', guest.id);
+    const { storagePath } = await request.json();
 
-    if (error) {
-      throw new Error(error.message);
+    if (!storagePath) {
+      return NextResponse.json({ error: 'Missing storagePath' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true });
+    const supabaseAdmin = createAdminClient();
+
+    const { data, error } = await supabaseAdmin.storage
+      .from('event-photos')
+      .createSignedUrl(storagePath, 60 * 60); // 1-hour TTL
+
+    if (error || !data) {
+       throw new Error(error?.message || 'Failed to generate signed URL');
+    }
+
+    return NextResponse.json({
+       url: data.signedUrl
+    });
 
   } catch (err: any) {
     if (err instanceof ApiError) {
