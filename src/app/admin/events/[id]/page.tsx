@@ -1,26 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminGuestList from '@/components/admin/AdminGuestList';
 import AdminLiveGallery from '@/components/admin/AdminLiveGallery';
 
-export default function AdminEventDetailPage({ params }: { params: { id: string } }) {
+export default function AdminEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: eventId } = use(params);
   const [event, setEvent] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`/api/admin/events/${params.id}`)
+    if (!eventId) return;
+    fetch(`/api/admin/events/${eventId}`)
       .then(r => r.json())
       .then(d => { if(d.event) setEvent(d.event); })
-  }, [params.id]);
+  }, [eventId]);
 
   const handleDelete = async () => {
     const checkName = prompt(`Type "${event.name}" to confirm permanent deletion:`);
     if (checkName !== event.name) return alert('Name verification failed.');
     
     try {
-      const res = await fetch(`/api/admin/events/${params.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/events/${eventId}`, { method: 'DELETE' });
       if (res.ok) router.push('/admin/events');
     } catch {
       alert('Failed to delete event');
@@ -30,7 +32,7 @@ export default function AdminEventDetailPage({ params }: { params: { id: string 
   const handleEndEarly = async () => {
     if (!confirm('End event immediately? Guests will lose upload access.')) return;
     try {
-      const res = await fetch(`/api/admin/events/${params.id}`, { 
+      const res = await fetch(`/api/admin/events/${eventId}`, { 
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ is_active: false })
@@ -71,8 +73,8 @@ export default function AdminEventDetailPage({ params }: { params: { id: string 
       
       {/* Admin Realtime Dashboards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <AdminGuestList eventId={params.id} />
-         <AdminLiveGallery eventId={params.id} />
+         <AdminGuestList eventId={eventId} />
+         <AdminLiveGallery eventId={eventId} />
       </div>
 
     </div>

@@ -4,11 +4,15 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const eventId = params.id;
-    if (!eventId) return NextResponse.json({ error: 'Missing event ID' }, { status: 400 });
+    const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
+    if (!id) return NextResponse.json({ error: 'Missing event ID' }, { status: 400 });
 
     const token = getSessionTokenOrThrow(request);
     await validateGuestSession(token); // Validates guest is active and allowed
@@ -18,8 +22,8 @@ export async function GET(
     // Fetch all active photos for this event, newest first
     const { data: photos, error } = await supabaseAdmin
       .from('photos')
-      .select('id, storage_path, uploaded_at, guests(display_name)')
-      .eq('event_id', eventId)
+      .select('id, storage_path, width, height, uploaded_at, guests(display_name)')
+      .eq('event_id', id)
       .eq('is_deleted', false)
       .order('uploaded_at', { ascending: false });
 
@@ -38,7 +42,7 @@ export async function GET(
     if (urlError) throw new Error(urlError.message);
 
     // Map together
-    const mappedPhotos = photos.map((p, i) => {
+    const mappedPhotos = photos.map((p: any) => {
       const urlObj = signedUrls.find(u => u.path === p.storage_path);
       return {
         id: p.id,

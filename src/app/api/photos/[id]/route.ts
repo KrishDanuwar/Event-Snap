@@ -4,10 +4,10 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const photoId = params.id;
+    const { id: photoId } = await params;
     if (!photoId) return NextResponse.json({ error: 'Missing photo ID' }, { status: 400 });
 
     const token = getSessionTokenOrThrow(request);

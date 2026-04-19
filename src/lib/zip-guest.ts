@@ -25,7 +25,7 @@ export async function downloadGuestZip(
         }
         zipChunks.push(chunk);
         if (final) {
-          const blob = new Blob(zipChunks, { type: 'application/zip' });
+          const blob = new Blob(zipChunks as unknown as BlobPart[], { type: 'application/zip' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;

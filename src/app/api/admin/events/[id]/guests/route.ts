@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const supabaseAdmin = createAdminClient();
     const { data: guests, error } = await supabaseAdmin
       .from('guests')
       .select('id, display_name, photo_count, joined_at, is_removed')
-      .eq('event_id', params.id)
+      .eq('event_id', id)
       .order('joined_at', { ascending: false });
 
     if (error) throw new Error(error.message);

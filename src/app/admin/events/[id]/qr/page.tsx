@@ -1,19 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { downloadQRAsPNG } from '@/lib/qr';
 import { downloadA5PrintCard } from '@/lib/pdf-card';
 
-export default function QRGenerationPage({ params }: { params: { id: string } }) {
+export default function QRGenerationPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: eventId } = use(params);
   const [eventData, setEventData] = useState<any>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/events/${params.id}`)
+    if (!eventId) return;
+    fetch(`/api/admin/events/${eventId}`)
       .then(r => r.json())
       .then(d => { if (d.event) setEventData(d.event) });
-  }, [params.id]);
+  }, [eventId]);
 
   if (!eventData) return <div className="p-10 animate-pulse">Loading Event Specifications...</div>;
 
@@ -39,10 +41,6 @@ export default function QRGenerationPage({ params }: { params: { id: string } })
           {/* Main Visual Box */}
           <div className="bg-white p-10 rounded-3xl shadow-sm border border-neutral-200 flex flex-col items-center justify-center text-center">
              <div className="p-4 bg-white rounded-2xl shadow-xl mb-8 border border-neutral-100 relative">
-               {/* 
-                 PRD demands Level H error correction (30%) if we want logos. 
-                 We embed custom colors verifying contrast ratios via Host's theme picking.
-               */}
                <QRCodeCanvas 
                  id={qrCanvasId}
                  value={guestUrl}
@@ -50,7 +48,7 @@ export default function QRGenerationPage({ params }: { params: { id: string } })
                  level="H"
                  fgColor={theme.primaryColor}
                  imageSettings={eventData.logo_path ? {
-                   src: "https://via.placeholder.com/150", // Stand-in logo until S3 pre-signed fetch logic mapping is resolved for signed-urls
+                   src: "https://via.placeholder.com/150", 
                    height: 50,
                    width: 50,
                    excavate: true
@@ -99,45 +97,33 @@ export default function QRGenerationPage({ params }: { params: { id: string } })
           </div>
        </div>
 
-       {/* OFF-SCREEN DOM NODE FOR HTML2CANVAS (Strictly matching PRD A5 spec visual) */}
-       {/* Note: This is visually hidden via absolute positioning far off-screen so we don't pollute the admin dashboard UX */}
+       {/* OFF-SCREEN DOM NODE FOR HTML2CANVAS */}
        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', overflow: 'hidden' }}>
-          
-         {/* EXACT A5 Pixel Ratio 148x210 mm at ~96DPI = roughly 559 x 794 px canvas container */}
-         <div id={printNodeId} style={{ width: '559px', height: '794px', backgroundColor: '#ffffff', position: 'relative', display: 'flex', flexDirection: 'col', fontFamily: theme.fontFamily || 'Inter, sans-serif' }}>
-            
-            {/* Top Logo Band (30mm) */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '113px', backgroundColor: theme.primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '80px', height: '80px', backgroundColor: '#fff', borderRadius: '50%', border: '4px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>
-                   📸
-                </div>
-            </div>
-
-            {/* Title Body */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '150px', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: theme.textColor === '#ffffff' ? '#000000' : theme.textColor }}>{eventData.name}</h1>
-                <p style={{ fontSize: '18px', margin: 0, color: '#555555', maxWidth: '80%' }}>{eventData.welcome_message || 'Scan the QR code below to share your photos instantly.'}</p>
-            </div>
-
-            {/* Massive Centered QR Code Box (80x80 mm ~ 300px) */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '60px' }}>
-                <div style={{ padding: '20px', backgroundColor: '#ffffff', borderRadius: '20px', border: `3px solid ${theme.primaryColor}` }}>
-                  <QRCodeCanvas 
-                    value={guestUrl}
-                    size={280}
-                    level="H"
-                    fgColor={theme.primaryColor}
-                  />
-                </div>
-            </div>
-
-            {/* Footer */}
-            <div style={{ position: 'absolute', bottom: '40px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-               <h3 style={{ fontSize: '20px', margin: 0, fontWeight: 'bold' }}>Scan to share your photos</h3>
-               <p style={{ fontSize: '14px', margin: 0, color: '#888888', textDecoration: 'underline' }}>{guestUrl}</p>
-            </div>
-
-         </div>
+          <div id={printNodeId} style={{ width: '559px', height: '794px', backgroundColor: '#ffffff', position: 'relative', display: 'flex', flexDirection: 'column', fontFamily: theme.fontFamily || 'Inter, sans-serif' }}>
+             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '113px', backgroundColor: theme.primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <div style={{ width: '80px', height: '80px', backgroundColor: '#fff', borderRadius: '50%', border: '4px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>
+                    📸
+                 </div>
+             </div>
+             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '150px', textAlign: 'center' }}>
+                 <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: theme.textColor === '#ffffff' ? '#000000' : theme.textColor }}>{eventData.name}</h1>
+                 <p style={{ fontSize: '18px', margin: 0, color: '#555555', maxWidth: '80%' }}>{eventData.welcome_message || 'Scan the QR code below to share your photos instantly.'}</p>
+             </div>
+             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '60px' }}>
+                 <div style={{ padding: '20px', backgroundColor: '#ffffff', borderRadius: '20px', border: `3px solid ${theme.primaryColor}` }}>
+                   <QRCodeCanvas 
+                     value={guestUrl}
+                     size={280}
+                     level="H"
+                     fgColor={theme.primaryColor}
+                   />
+                 </div>
+             </div>
+             <div style={{ position: 'absolute', bottom: '40px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ fontSize: '20px', margin: 0, fontWeight: 'bold' }}>Scan to share your photos</h3>
+                <p style={{ fontSize: '14px', margin: 0, color: '#888888', textDecoration: 'underline' }}>{guestUrl}</p>
+             </div>
+          </div>
        </div>
 
     </div>

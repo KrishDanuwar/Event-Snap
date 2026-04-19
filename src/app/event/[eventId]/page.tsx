@@ -5,8 +5,8 @@ import EventClientWrapper from '@/components/guest/EventClientWrapper';
 // Disable SSR statically, we must fetch fresh event data every time
 export const dynamic = 'force-dynamic';
 
-export default async function EventPage({ params }: { params: { eventId: string } }) {
-  const { eventId } = params;
+export default async function EventPage({ params }: { params: Promise<{ eventId: string }> }) {
+  const { eventId } = await params;
 
   const supabaseAdmin = createAdminClient();
 

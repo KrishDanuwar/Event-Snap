@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const supabaseAdmin = createAdminClient();
     const { data: event, error } = await supabaseAdmin
       .from('events')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !event) return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -17,8 +18,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const supabaseAdmin = createAdminClient();
     
@@ -33,7 +35,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { error } = await supabaseAdmin
       .from('events')
       .update(updatePayload)
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw new Error(error.message);
 
@@ -43,8 +45,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // Soft Delete execution exactly mirroring the PRD definition
     const supabaseAdmin = createAdminClient();
 
@@ -56,7 +59,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
          logo_path: null,
          theme: {}
       })
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw new Error(error.message);
 

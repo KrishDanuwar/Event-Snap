@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const token = getSessionTokenOrThrow(request);
     
     // Attempt validation
-    const sessionData = await validateGuestSession(token);
+    const sessionData: any = await validateGuestSession(token);
 
     // If we reach here, session is 'valid'
     return NextResponse.json({

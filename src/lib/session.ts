@@ -25,6 +25,7 @@ export async function validateGuestSession(token: string | null) {
       is_removed,
       display_name,
       joined_at,
+      consented_at,
       events!inner (
         is_active,
         expires_at

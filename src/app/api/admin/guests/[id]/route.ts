@@ -1,19 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const supabaseAdmin = createAdminClient();
     
     // PRD states:
     // guests.is_removed = true
     // photos.is_deleted = true (all this guest's photos)
     
-    const { data: guest } = await supabaseAdmin.from('guests').select('event_id').eq('id', params.id).single();
+    const { data: guest } = await supabaseAdmin.from('guests').select('event_id').eq('id', id).single();
     if (!guest) return NextResponse.json({ error: 'Guest not found' }, { status: 404 });
 
-    await supabaseAdmin.from('guests').update({ is_removed: true }).eq('id', params.id);
-    await supabaseAdmin.from('photos').update({ is_deleted: true }).eq('guest_id', params.id);
+    await supabaseAdmin.from('guests').update({ is_removed: true }).eq('id', id);
+    await supabaseAdmin.from('photos').update({ is_deleted: true }).eq('guest_id', id);
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
