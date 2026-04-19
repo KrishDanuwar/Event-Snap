@@ -18,14 +18,24 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
   }, [eventId]);
 
   const handleDelete = async () => {
-    const checkName = prompt(`Type "${event.name}" to confirm permanent deletion:`);
-    if (checkName !== event.name) return alert('Name verification failed.');
+    const confirmation = confirm(`Are you sure you want to delete "${event.name}"? This action follows a soft-delete policy: the event will be hidden and assets cleared, but records remain in the database history.`);
+    if (!confirmation) return;
+
+    const checkName = prompt(`Please type "${event.name}" to finalize deletion:`);
+    if (checkName !== event.name) return alert('Name verification failed. Deletion aborted.');
     
     try {
       const res = await fetch(`/api/admin/events/${eventId}`, { method: 'DELETE' });
-      if (res.ok) router.push('/admin/events');
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert('Event successfully deleted.');
+        router.push('/admin/events');
+      } else {
+        alert(`Failed to delete event: ${data.error || 'Server error'}`);
+      }
     } catch {
-      alert('Failed to delete event');
+      alert('Network error: Failed to connect to server for deletion.');
     }
   };
 
@@ -37,9 +47,15 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ is_active: false })
       });
-      if (res.ok) setEvent({...event, is_active: false});
+      const data = await res.json();
+      if (res.ok) {
+        setEvent({...event, is_active: false});
+        alert('Event has been deactivated.');
+      } else {
+        alert(`Failed: ${data.error || 'Unknown error'}`);
+      }
     } catch {
-       alert('Operation failed');
+       alert('Operation failed due to network error.');
     }
   };
 

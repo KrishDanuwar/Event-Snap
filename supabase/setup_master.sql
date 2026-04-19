@@ -53,12 +53,12 @@ ALTER TABLE guests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies to avoid duplicates on rerun
-DO $$ 
-BEGIN
-    EXECUTE (SELECT 'DROP POLICY IF EXISTS ' || quote_ident(policyname) || ' ON ' || quote_ident(tablename) FROM pg_policies WHERE schemaname = 'public');
-EXCEPTION WHEN OTHERS THEN 
-    NULL;
-END $$;
+DROP POLICY IF EXISTS "events_public_read_active" ON events;
+DROP POLICY IF EXISTS "events_admin_all" ON events;
+DROP POLICY IF EXISTS "guests_public_read" ON guests;
+DROP POLICY IF EXISTS "guests_admin_all" ON guests;
+DROP POLICY IF EXISTS "photos_public_read" ON photos;
+DROP POLICY IF EXISTS "photos_admin_all" ON photos;
 
 CREATE POLICY "events_public_read_active" ON events FOR SELECT USING (is_active = true AND deleted_at IS NULL);
 CREATE POLICY "events_admin_all" ON events FOR ALL USING (auth.role() = 'authenticated');
@@ -91,7 +91,7 @@ SELECT cron.schedule(
   SELECT
     net.http_post(
       url:='https://fbesqscxkxklqyjwpupk.supabase.co/functions/v1/auto-delete-expired',
-      headers:='{"Content-Type": "application/json", "Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb,
+      headers:='{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiZXNxc2N4a3hrbHF5andwdXBrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjYxOTIxOCwiZXhwIjoyMDkyMTk1MjE4fQ.pmaTjqqzsq5pc9O6L77S70EfazJJlBlpCp8fw07L-qM"}'::jsonb,
       body:='{}'::jsonb
     );
   $$
@@ -99,7 +99,7 @@ SELECT cron.schedule(
 
 -- 6. INITIAL ADMIN USER (TEMPORARY BYPASS)
 -- Note: Replace with your own email/password
-INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, confirmed_at)
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
   gen_random_uuid(),
@@ -112,6 +112,5 @@ VALUES (
   now(),
   '{"provider":"email","providers":["email"]}',
   '{}',
-  false,
-  now()
+  false
 ) ON CONFLICT (id) DO NOTHING;

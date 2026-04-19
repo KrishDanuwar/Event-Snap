@@ -28,24 +28,32 @@ export default function AdminEventsPage() {
     return deletedEvents;
   };
 
-  const createDummyEventPlaceholder = async () => {
-     // A stub creator to transition into Phase 7 later. Placed for UX completeness today.
+  const createNewEventWithPrompt = async () => {
+     const name = prompt('Enter a name for your new event:', 'My Awesome Event');
+     if (!name) return;
+
      try {
+       setIsLoading(true);
        const res = await fetch('/api/admin/events', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({
-           name: 'New Untitled Event',
-           expires_at: new Date(Date.now() + 86400000).toISOString(),
-           welcome_message: 'Welcome to our event!'
+           name,
+           expires_at: new Date(Date.now() + (86400000 * 7)).toISOString(), // Default: 7 days
+           welcome_message: `Welcome to ${name}!`
          })
        });
        const data = await res.json();
        if (data.id) {
          router.push(`/admin/events/${data.id}`);
+       } else {
+         alert('Failed to create event: ' + (data.error || 'Unknown error'));
+         setIsLoading(false);
        }
      } catch (err) {
-       console.error("Failed to create setup", err);
+       console.error("Failed to create event", err);
+       alert('Failed to connect to the server.');
+       setIsLoading(false);
      }
   };
 
@@ -59,10 +67,10 @@ export default function AdminEventsPage() {
           <p className="text-neutral-500 text-lg">Manage galleries, oversee guests, and configure settings.</p>
         </div>
         <button 
-          onClick={createDummyEventPlaceholder}
+          onClick={createNewEventWithPrompt}
           className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-sm"
         >
-          ➕ Quick Create Event
+          ➕ Create New Event
         </button>
       </div>
 
