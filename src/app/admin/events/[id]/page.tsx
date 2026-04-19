@@ -111,6 +111,12 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
             </div>
             
             <div className="flex flex-col gap-3">
+               <Link 
+                  href={`/admin/events/${eventId}/settings`}
+                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-3 text-sm rounded-xl font-bold transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
+               >
+                  🎨 Design & Settings
+               </Link>
                <button 
                   onClick={handleExportZip} 
                   disabled={isExporting}
