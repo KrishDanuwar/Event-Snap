@@ -7,7 +7,7 @@ import ConsentScreen from './ConsentScreen';
 import MainAppShell from './MainAppShell';
 
 export default function EventClientWrapper({ eventId, eventData }: { eventId: string, eventData: any }) {
-  const { sessionState, isLoading, guestDetails } = useGuestSession(eventId);
+  const { sessionState, isLoading, guestDetails, joinSession, session } = useGuestSession(eventId);
   
   // Local state to gracefully handle after consent is given
   const [justConsented, setJustConsented] = useState(false);
@@ -18,7 +18,7 @@ export default function EventClientWrapper({ eventId, eventData }: { eventId: st
 
   // 1. No Active DB Session or Token Expired
   if (sessionState === 'no_token' || sessionState === 'invalid' || sessionState === 'expired') {
-    return <JoinScreen eventId={eventId} eventData={eventData} />;
+    return <JoinScreen eventId={eventId} eventData={eventData} onJoin={joinSession} />;
   }
 
   // 2. Removed by Admin
@@ -33,7 +33,7 @@ export default function EventClientWrapper({ eventId, eventData }: { eventId: st
 
   // 3. Needs Privacy Consent
   if (!justConsented && guestDetails && guestDetails.consentedAt === null) {
-    return <ConsentScreen eventId={eventId} onAgreed={() => setJustConsented(true)} />;
+    return <ConsentScreen eventId={eventId} session={session} onAgreed={() => setJustConsented(true)} />;
   }
 
   // 4. Fully Authenticated

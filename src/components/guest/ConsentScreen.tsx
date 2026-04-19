@@ -2,9 +2,16 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useGuestSession } from '@/hooks/useGuestSession';
 
-export default function ConsentScreen({ eventId, onAgreed }: { eventId: string, onAgreed: () => void }) {
+export default function ConsentScreen({ 
+  eventId, 
+  session,
+  onAgreed 
+}: { 
+  eventId: string, 
+  session: any,
+  onAgreed: () => void 
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { session } = useGuestSession(eventId);
 
   const handleAgree = async () => {
     if (!session) return;

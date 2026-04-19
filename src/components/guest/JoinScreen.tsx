@@ -3,11 +3,18 @@ import { useGuestSession } from '@/hooks/useGuestSession';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function JoinScreen({ eventId, eventData }: { eventId: string, eventData: any }) {
+export default function JoinScreen({ 
+  eventId, 
+  eventData, 
+  onJoin 
+}: { 
+  eventId: string, 
+  eventData: any,
+  onJoin: (name: string) => Promise<any>
+}) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { joinSession } = useGuestSession(eventId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +24,7 @@ export default function JoinScreen({ eventId, eventData }: { eventId: string, ev
     setError('');
 
     try {
-      await joinSession(name);
+      await onJoin(name);
     } catch (err: any) {
       setError(err.message || 'Failed to join. Please try again.');
     } finally {
