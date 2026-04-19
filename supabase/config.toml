@@ -1,6 +1,5 @@
-[project]
-id = "fbesqscxkxklqyjwpupk"
-name = "EventSnap"
+# supabase/config.toml
+project_id = "fbesqscxkxklqyjwpupk"
 
 [api]
 enabled = true

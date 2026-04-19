@@ -52,9 +52,9 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // If user is logged in and trying to access /admin login page, redirect to events
+  // If user is logged in and trying to access /admin login page, redirect to dashboard
   if (path === '/admin' && user) {
-    return NextResponse.redirect(new URL('/admin/events', request.url));
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
   return supabaseResponse;

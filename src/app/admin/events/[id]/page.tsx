@@ -43,6 +43,40 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
     }
   };
 
+  const [isExporting, setIsExporting] = useState(false);
+  const handleExportZip = async () => {
+    setIsExporting(true);
+    try {
+      const { createBrowserClient } = await import('@/lib/supabase/client');
+      const supabase = createBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/export-event-zip`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({ eventId })
+      });
+      
+      if (!res.ok) throw new Error('Export failed. Make sure the Edge Function is deployed and active.');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${event.name.replace(/\s+/g, '_')}_photos.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+       alert(err.message);
+    } finally {
+       setIsExporting(false);
+    }
+  };
+
   if (!event) return <div className="p-10">Loading...</div>;
 
   return (
@@ -61,6 +95,13 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
             </div>
             
             <div className="flex flex-col gap-3">
+               <button 
+                  onClick={handleExportZip} 
+                  disabled={isExporting}
+                  className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 text-sm rounded-lg font-medium transition-colors border border-red-200 flex items-center justify-center gap-2"
+               >
+                  {isExporting ? '📦 Zipping Photostream...' : '📥 Download All Photos (ZIP)'}
+               </button>
                <button onClick={handleEndEarly} disabled={!event.is_active} className="bg-neutral-800 text-white hover:bg-black px-4 py-2 text-sm rounded-lg font-medium disabled:opacity-50 transition-colors">
                   End Event Early
                </button>

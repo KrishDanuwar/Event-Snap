@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <nav className="flex-1 px-4 space-y-2 text-sm font-medium">
-          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-neutral-100 text-neutral-700">
+          <Link href="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-neutral-100 text-neutral-700">
             📊 Dashboard
           </Link>
           <Link href="/admin/events" className="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-neutral-100 text-neutral-700">
@@ -24,6 +26,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ⚙️ Settings
           </Link>
         </nav>
+
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-neutral-100">
+           <button 
+             onClick={async () => {
+                const { createBrowserClient } = await import('@/lib/supabase/client');
+                const supabase = createBrowserClient();
+                await supabase.auth.signOut();
+                window.location.href = '/admin';
+             }}
+             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-red-500 hover:bg-red-50 font-semibold"
+           >
+             🚪 Sign Out
+           </button>
+        </div>
       </aside>
 
       {/* Main Content Area */}
