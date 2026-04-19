@@ -137,29 +137,34 @@ export default function GalleryView({ eventId, eventName }: { eventId: string, e
   };
 
   return (
-    <div className="flex-1 flex flex-col w-full h-full bg-background overflow-hidden relative">
+    <div className="flex-1 flex flex-col w-full h-full bg-white overflow-hidden relative">
       
-      {/* Header controls */}
-      <div className="p-4 flex flex-wrap items-center justify-between gap-3 bg-[var(--color-primary)]/10 border-b border-[var(--color-primary)]/20 shadow-sm z-10 sticky top-0 backdrop-blur-md">
+      {/* Premium Light Header */}
+      <div className="px-6 py-4 flex items-center justify-between gap-3 bg-white border-b border-neutral-100 z-10 sticky top-0">
          
-         <select 
-           value={filterGuestName}
-           onChange={(e) => setFilterGuestName(e.target.value)}
-           className="bg-white/80 dark:bg-black/80 text-[var(--color-text)] border border-[var(--color-primary)]/30 rounded-full px-4 py-2 text-sm font-medium outline-none"
-         >
-           <option value="all">All Guests ({photos.length})</option>
-           {uniqueGuests.map(name => (
-             <option key={name} value={name}>{name}</option>
-           ))}
-         </select>
+         <div className="flex flex-col">
+            <h2 className="text-xl font-extrabold tracking-tight text-black flex items-center gap-2">
+               {eventName}
+            </h2>
+            <select 
+              value={filterGuestName}
+              onChange={(e) => setFilterGuestName(e.target.value)}
+              className="mt-1 text-[var(--color-primary)] font-bold text-xs uppercase tracking-widest outline-none bg-transparent"
+            >
+              <option value="all">All Photos ({photos.length})</option>
+              {uniqueGuests.map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+         </div>
 
          {guestDetails && guestDetails.photoCount > 0 && (
             <button 
               onClick={handleOwnDownload}
               disabled={isZipping}
-              className="bg-[var(--color-button)] text-white/90 font-semibold px-4 py-2 rounded-full text-sm shadow-sm flex items-center gap-2 disabled:opacity-50"
+              className="bg-primary text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow-lg shadow-blue-200 flex items-center gap-2 disabled:opacity-50 transition-transform active:scale-95"
             >
-               {isZipping ? `Zipping ${Math.round(zipProgress)}%` : `↓ Save My Photos (${guestDetails.photoCount})`}
+               {isZipping ? `Saving...` : `Download (${guestDetails.photoCount})`}
             </button>
          )}
       </div>
@@ -173,19 +178,22 @@ export default function GalleryView({ eventId, eventName }: { eventId: string, e
          </div>
       )}
 
-      {/* Masonry-like Grid */}
-      <div className="flex-1 overflow-y-auto w-full p-1 pb-32">
-         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 auto-rows-[150px]">
+      {/* Refined Grid */}
+      <div className="flex-1 overflow-y-auto w-full p-2 pb-40">
+         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 auto-rows-[120px] md:auto-rows-[180px]">
            {displayedPhotos.map(photo => (
              <div 
                key={photo.id} 
-               onClick={() => setSelectedPhoto(photo)}
-               className="relative overflow-hidden cursor-pointer group bg-muted rounded-sm border border-[var(--color-primary)]/10"
+               onClick={() => {
+                  if (window.navigator.vibrate) window.navigator.vibrate(20);
+                  setSelectedPhoto(photo);
+               }}
+               className="relative overflow-hidden cursor-pointer group rounded-xl bg-neutral-50 shadow-sm active:scale-95 transition-transform"
              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url!} alt="Photo" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <div className="text-white text-xs font-semibold truncate">{photo.guestName}</div>
+                <img src={photo.url!} alt="Photo" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 pt-6">
+                   <div className="text-white text-[10px] font-bold truncate opacity-80 uppercase tracking-tighter">{photo.guestName}</div>
                 </div>
              </div>
            ))}

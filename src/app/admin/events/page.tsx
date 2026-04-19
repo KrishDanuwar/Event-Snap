@@ -68,7 +68,7 @@ export default function AdminEventsPage() {
         </div>
         <button 
           onClick={createNewEventWithPrompt}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-medium transition-colors shadow-sm"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-100 flex items-center gap-2 active:scale-95"
         >
           ➕ Create New Event
         </button>
@@ -76,13 +76,13 @@ export default function AdminEventsPage() {
 
       {/* Tabs */}
       <div className="flex gap-4 border-b border-neutral-200 pb-2">
-         <button onClick={() => setActiveTab('active')} className={`font-semibold pb-2 border-b-2 transition-colors ${activeTab === 'active' ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-500 hover:text-neutral-800'}`}>
+         <button onClick={() => setActiveTab('active')} className={`font-bold pb-2 border-b-2 transition-colors ${activeTab === 'active' ? 'border-blue-500 text-blue-500' : 'border-transparent text-neutral-400 hover:text-neutral-800'}`}>
             Active ({activeEvents.length})
          </button>
-         <button onClick={() => setActiveTab('expired')} className={`font-semibold pb-2 border-b-2 transition-colors ${activeTab === 'expired' ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-500 hover:text-neutral-800'}`}>
+         <button onClick={() => setActiveTab('expired')} className={`font-bold pb-2 border-b-2 transition-colors ${activeTab === 'expired' ? 'border-blue-500 text-blue-500' : 'border-transparent text-neutral-400 hover:text-neutral-800'}`}>
             Expired ({expiredEvents.length})
          </button>
-         <button onClick={() => setActiveTab('deleted')} className={`font-semibold pb-2 border-b-2 transition-colors ${activeTab === 'deleted' ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-500 hover:text-neutral-800'}`}>
+         <button onClick={() => setActiveTab('deleted')} className={`font-bold pb-2 border-b-2 transition-colors ${activeTab === 'deleted' ? 'border-blue-500 text-blue-500' : 'border-transparent text-neutral-400 hover:text-neutral-800'}`}>
             Deleted
          </button>
       </div>
@@ -95,19 +95,19 @@ export default function AdminEventsPage() {
            </div>
          ) : (
            getFilteredEvents().map(event => (
-             <div key={event.id} className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 flex items-center justify-between group hover:border-red-300 transition-colors">
-                <div>
-                   <h3 className="font-bold text-lg">{event.name}</h3>
-                   <div className="text-sm text-neutral-500 mt-1">
-                      {event.deleted_at ? `Deleted: ${new Date(event.deleted_at).toLocaleDateString()}` : `Expires: ${new Date(event.expires_at).toLocaleDateString()}`}
-                   </div>
-                </div>
-                {!event.deleted_at && (
-                  <Link href={`/admin/events/${event.id}`} className="bg-neutral-100 hover:bg-red-50 text-neutral-700 hover:text-red-700 font-medium px-4 py-2 rounded-lg transition-colors">
-                     Manage Event →
-                  </Link>
-                )}
-             </div>
+              <div key={event.id} className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-100 flex items-center justify-between group hover:border-blue-300 transition-colors">
+                 <div>
+                    <h3 className="font-bold text-lg">{event.name}</h3>
+                    <div className="text-sm text-neutral-500 mt-1">
+                       {event.deleted_at ? `Deleted: ${new Date(event.deleted_at).toLocaleDateString()}` : `Expires: ${new Date(event.expires_at).toLocaleDateString()}`}
+                    </div>
+                 </div>
+                 {!event.deleted_at && (
+                   <Link href={`/admin/events/${event.id}`} className="bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold px-4 py-2 rounded-lg transition-colors">
+                      Manage →
+                   </Link>
+                 )}
+              </div>
            ))
          )}
       </div>

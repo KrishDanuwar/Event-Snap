@@ -91,27 +91,27 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Beautiful Rich Red */
-    --primary: 348 83% 47%;
-    --primary-foreground: 210 40% 98%;
+    /* Beautiful Rich Blue (iOS inspired) */
+    --primary: 201 96% 40%; 
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 40% 98%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 210 40% 98%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 348 83% 47%;
+    --border: 214.3 31.8% 95%;
+    --input: 214.3 31.8% 95%;
+    --ring: 201 96% 40%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -170,8 +170,8 @@
   min-height: 100dvh;
 }
 
-.event-overlay-light { background: rgba(0, 0, 0, 0.45); }
-.event-overlay-dark { background: rgba(255, 255, 255, 0.55); }
+.event-overlay-light { background: rgba(255, 255, 255, 0.45); }
+.event-overlay-dark { background: rgba(255, 255, 255, 0.45); }
 
 /* Utility classes */
 .pt-safe { padding-top: var(--safe-area-top); }

@@ -16,25 +16,28 @@ export default function MainAppShell({ eventId, eventName }: { eventId: string, 
          {activeTab === 'camera' ? <CameraView eventId={eventId} /> : <GalleryView eventId={eventId} eventName={eventName || 'EventSnap'} />}
       </main>
 
-      {/* Floating Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+var(--safe-area-bottom))] bg-gradient-to-t from-black/80 to-transparent pointer-events-none flex justify-center">
-        <div className="bg-black/60 backdrop-blur-lg border border-white/10 rounded-full px-2 py-2 flex gap-2 pointer-events-auto shadow-2xl">
-           
+      {/* Native-feel Bottom Navigation (iPhone Style) */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-2xl border-t border-neutral-100 flex flex-col items-center pointer-events-auto shadow-[0_-10px_40px_rgba(0,0,0,0.05)] pt-4 pb-[calc(1.5rem+var(--safe-area-bottom))]">
+        
+        {/* Mode Switcher Line */}
+        <div className="flex gap-8 mb-4 px-4 overflow-x-auto no-scrollbar pointer-events-auto">
            <button 
              onClick={() => setActiveTab('camera')}
-             className={`px-6 py-3 rounded-full text-sm font-semibold transition-colors ${activeTab === 'camera' ? 'bg-white text-black' : 'text-white hover:bg-white/20'}`}
+             className={`text-xs font-bold tracking-[0.2em] uppercase transition-all ${activeTab === 'camera' ? 'text-primary' : 'text-neutral-400'}`}
            >
-             📸 Camera
+             Camera
            </button>
-
            <button 
              onClick={() => setActiveTab('gallery')}
-             className={`px-6 py-3 rounded-full text-sm font-semibold transition-colors ${activeTab === 'gallery' ? 'bg-white text-black' : 'text-white hover:bg-white/20'}`}
+             className={`text-xs font-bold tracking-[0.2em] uppercase transition-all ${activeTab === 'gallery' ? 'text-primary' : 'text-neutral-400'}`}
            >
-             🖼️ Gallery
+             Gallery
            </button>
-           
         </div>
+
+        {/* The "Main Action" will be handled inside the views (e.g. Shutter in CameraView) */}
+        {/* This bar just holds the switcher and maybe a small indicator */}
+        <div className="w-12 h-1 bg-neutral-200 rounded-full mb-1" />
       </nav>
       
     </div>

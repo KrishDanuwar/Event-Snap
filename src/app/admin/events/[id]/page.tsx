@@ -114,14 +114,14 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
                <button 
                   onClick={handleExportZip} 
                   disabled={isExporting}
-                  className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 text-sm rounded-lg font-medium transition-colors border border-red-200 flex items-center justify-center gap-2"
+                  className="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 text-sm rounded-lg font-bold transition-all border border-blue-200 flex items-center justify-center gap-2"
                >
                   {isExporting ? '📦 Zipping Photostream...' : '📥 Download All Photos (ZIP)'}
                </button>
                <button onClick={handleEndEarly} disabled={!event.is_active} className="bg-neutral-800 text-white hover:bg-black px-4 py-2 text-sm rounded-lg font-medium disabled:opacity-50 transition-colors">
                   End Event Early
                </button>
-               <button onClick={handleDelete} className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 text-sm rounded-lg font-medium transition-colors border border-red-200">
+               <button onClick={handleDelete} className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 text-sm rounded-lg font-bold transition-all border border-red-200">
                   Delete Event
                </button>
             </div>

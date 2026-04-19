@@ -33,7 +33,7 @@ export default function JoinScreen({
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 text-center animate-slide-up pt-safe pb-safe">
+    <div className="flex-1 flex flex-col items-center justify-center px-6 text-center animate-slide-up pt-safe pb-safe bg-white">
       
       {eventData.logo_url && (
          <img 
@@ -58,7 +58,7 @@ export default function JoinScreen({
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={30}
-          className="h-14 text-lg rounded-2xl bg-white/10 border-white/20 placeholder:text-[var(--color-text)] placeholder:opacity-50 text-[var(--color-text)] focus-visible:ring-[var(--color-primary)] backdrop-blur-md"
+          className="h-16 text-lg rounded-[2rem] bg-neutral-50 border-neutral-100 placeholder:text-neutral-400 text-black focus-visible:ring-primary shadow-inner"
           required
         />
         
@@ -66,11 +66,10 @@ export default function JoinScreen({
         
         <Button
           type="submit"
-          className="w-full h-14 text-lg rounded-2xl font-semibold shadow-lg transition-transform hover:-translate-y-0.5"
-          style={{ backgroundColor: 'var(--color-button)', color: eventData.theme?.textMode === 'light' ? '#fff' : '#000' }}
+          className="w-full h-16 text-lg rounded-[2rem] font-bold shadow-xl shadow-blue-100 transition-transform active:scale-95 bg-primary text-white"
           disabled={isSubmitting || !name.trim()}
         >
-          {isSubmitting ? 'Joining...' : 'Join Event'}
+          {isSubmitting ? 'Entering...' : 'Join Event'}
         </Button>
       </form>
       

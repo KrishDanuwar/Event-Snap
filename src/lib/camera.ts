@@ -1,15 +1,15 @@
 /**
  * Initializes the device camera for the event guest flow.
- * Ensures the rear camera is preferred, and requests high resolution natively.
+ * Supports toggling between user (selfie) and environment (rear) modes.
  */
-export async function initializeCamera(): Promise<MediaStream> {
+export async function initializeCamera(facingMode: 'user' | 'environment' = 'environment'): Promise<MediaStream> {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     throw new Error('Camera API not supported or secured properly context');
   }
 
   const stream = await navigator.mediaDevices.getUserMedia({
     video: {
-      facingMode: { ideal: 'environment' }, // rear camera preferred
+      facingMode: { exact: facingMode }, 
       width:  { ideal: 3840 },
       height: { ideal: 2160 },
     },
@@ -29,7 +29,12 @@ export function captureFrame(video: HTMLVideoElement): HTMLCanvasElement {
   const ctx = canvas.getContext('2d');
   
   if (ctx) {
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+     // Flip for selfie if needed
+     if (video.style.transform.includes('scaleX(-1)')) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+     }
+     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   }
   return canvas;
 }

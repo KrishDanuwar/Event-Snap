@@ -48,12 +48,12 @@ export default function AdminGuestList({ eventId }: { eventId: string }) {
          {activeGuests.length === 0 && <div className="text-neutral-400 text-sm text-center py-10">No guests have joined yet.</div>}
          
          {activeGuests.map(guest => (
-            <div key={guest.id} className="flex items-center justify-between p-3 border border-neutral-100 rounded-xl hover:border-red-200 transition-colors group">
+            <div key={guest.id} className="flex items-center justify-between p-3 border border-neutral-100 rounded-xl hover:border-blue-200 transition-colors group">
                <div>
                   <div className="font-semibold text-sm">{guest.display_name}</div>
                   <div className="text-xs text-neutral-400">Joined {new Date(guest.joined_at).toLocaleTimeString()}</div>
                </div>
-               <button onClick={() => handleRemoveGuest(guest.id, guest.display_name)} className="text-xs text-red-500 font-semibold px-3 py-1 bg-red-50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white">
+               <button onClick={() => handleRemoveGuest(guest.id, guest.display_name)} className="text-xs text-red-500 font-bold px-3 py-1 bg-red-50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white">
                   Remove
                </button>
             </div>
