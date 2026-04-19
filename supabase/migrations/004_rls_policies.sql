@@ -1,0 +1,2 @@
+-- supabase/migrations/004_rls_policies.sql
+-- TODO: Phase 1 — Row Level Security policies

@@ -1,0 +1,2 @@
+-- supabase/migrations/005_indexes.sql
+-- TODO: Phase 1 — Performance indexes

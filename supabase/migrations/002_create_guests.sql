@@ -1,0 +1,2 @@
+-- supabase/migrations/002_create_guests.sql
+-- TODO: Phase 1 — Guests table creation

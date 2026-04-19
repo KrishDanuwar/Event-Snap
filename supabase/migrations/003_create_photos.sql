@@ -1,0 +1,2 @@
+-- supabase/migrations/003_create_photos.sql
+-- TODO: Phase 1 — Photos table creation

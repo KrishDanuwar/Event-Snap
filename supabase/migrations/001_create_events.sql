@@ -1,0 +1,3 @@
+-- supabase/migrations/001_create_events.sql
+-- TODO: Phase 1 — Events table creation
+-- See PRD Section 6 for full schema
