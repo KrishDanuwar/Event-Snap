@@ -114,14 +114,14 @@ export default function CameraView({ eventId }: { eventId: string }) {
     const sequence: TimerSeconds[] = [0, 3, 5, 10];
     const currentIndex = sequence.indexOf(timer);
     const nextIndex = (currentIndex + 1) % sequence.length;
-    setTimer(sequence[nextIndex]);
+    setTimer(sequence[nextIndex] as TimerSeconds);
   };
 
   const cycleFilter = () => {
     const filters: FilterType[] = ['none', 'grayscale(1)', 'sepia(1)', 'saturate(2)'];
     const currentIndex = filters.indexOf(filter);
     const nextIndex = (currentIndex + 1) % filters.length;
-    setFilter(filters[nextIndex]);
+    setFilter(filters[nextIndex] as FilterType);
   };
 
   const handleRetake = () => {
