@@ -1,4 +1,4 @@
-export const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+export const MAX_BYTES = 2.5 * 1024 * 1024; // 2.5 MB - balanced for speed and quality
 
 function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -25,23 +25,24 @@ function scaleCanvas(canvas: HTMLCanvasElement, scale: number): HTMLCanvasElemen
 }
 
 export async function compressToLimit(canvas: HTMLCanvasElement): Promise<Blob> {
-  const qualitySteps = [0.92, 0.85, 0.75, 0.65];
+  // Start with a reasonable quality for faster processing
+  const qualitySteps = [0.85, 0.75, 0.60];
 
-  // Pass 1: reduce JPEG quality only (no dimension change)
+  // Pass 1: reduce JPEG quality
   for (const quality of qualitySteps) {
     const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
     if (blob.size <= MAX_BYTES) return blob;
   }
 
-  // Pass 2: scale canvas dimensions (last resort)
-  let scale = 0.9;
-  while (scale > 0.3) {
+  // Pass 2: scale canvas dimensions (if still too large)
+  let scale = 0.8;
+  while (scale > 0.4) {
     const scaled = scaleCanvas(canvas, scale);
-    const blob = await canvasToBlob(scaled, 'image/jpeg', 0.65);
+    const blob = await canvasToBlob(scaled, 'image/jpeg', 0.60);
     if (blob.size <= MAX_BYTES) return blob;
-    scale = parseFloat((scale - 0.1).toFixed(1));
+    scale -= 0.2;
   }
 
-  // Fallback: return best effort
-  return canvasToBlob(canvas, 'image/jpeg', 0.65);
+  // Fallback
+  return canvasToBlob(canvas, 'image/jpeg', 0.50);
 }

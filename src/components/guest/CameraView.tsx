@@ -9,6 +9,7 @@ import { useGuestSession } from '@/hooks/useGuestSession';
 type TimerSeconds = 0 | 3 | 5 | 10;
 type FilterType = 'none' | 'grayscale(1)' | 'sepia(1)' | 'saturate(2)';
 type CameraMode = 'PHOTO' | 'SQUARE' | 'PORTRAIT';
+type ZoomLevel = 1 | 2 | 4;
 
 export default function CameraView({ eventId }: { eventId: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -18,6 +19,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
   const [timer, setTimer] = useState<TimerSeconds>(0);
   const [filter, setFilter] = useState<FilterType>('none');
   const [mode, setMode] = useState<CameraMode>('PHOTO');
+  const [zoom, setZoom] = useState<ZoomLevel>(1);
   const [countdown, setCountdown] = useState<number | null>(null);
   
   const [previewCanvas, setPreviewCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -48,6 +50,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
           videoRef.current.srcObject = mediaStream;
         }
         setFlash(false);
+        setZoom(1); // Reset zoom on camera switch
       } catch (err: any) {
         console.error(err);
         setError('Camera access failed. Please ensure permissions are granted.');
@@ -68,7 +71,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
     if (!videoRef.current || countdown !== null) return;
     
     const snap = () => {
-       const canvas = captureFrame(videoRef.current!, mode === 'SQUARE');
+       const canvas = captureFrame(videoRef.current!, mode === 'SQUARE', zoom);
        setPreviewCanvas(canvas);
        setCountdown(null);
     };
@@ -111,6 +114,25 @@ export default function CameraView({ eventId }: { eventId: string }) {
       }
     } catch (err) {
       console.error('Flash toggle failed:', err);
+    }
+  };
+
+  const cycleZoom = async () => {
+    const nextZoom = zoom === 1 ? 2 : zoom === 2 ? 4 : 1;
+    setZoom(nextZoom);
+    
+    if (stream && facingMode === 'environment') {
+       const track = stream.getVideoTracks()[0];
+       try {
+          const capabilities = track.getCapabilities() as any;
+          if (capabilities.zoom) {
+             await track.applyConstraints({
+                advanced: [{ zoom: nextZoom }]
+             } as any);
+          }
+       } catch (e) {
+          console.warn('Hardware zoom not supported, using digital fallback');
+       }
     }
   };
 
@@ -167,8 +189,9 @@ export default function CameraView({ eventId }: { eventId: string }) {
                  playsInline 
                  muted 
                  style={{ 
-                   transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
-                   filter: filter
+                   transform: `${facingMode === 'user' ? 'scaleX(-1)' : ''} scale(${zoom})`,
+                   filter: filter,
+                   transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                  }}
                  className="object-cover w-full h-full"
                />
@@ -246,7 +269,12 @@ export default function CameraView({ eventId }: { eventId: string }) {
        {/* Zoom Indicator */}
        {!previewCanvas && (
          <div className="absolute bottom-40 left-1/2 -translate-x-1/2 z-40">
-            <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-[10px] font-bold text-white">1x</div>
+            <button 
+               onClick={cycleZoom}
+               className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-[10px] font-bold text-white active:scale-90 transition-transform"
+            >
+               {zoom}x
+            </button>
          </div>
        )}
 

@@ -30,9 +30,13 @@ export async function initializeCamera(facingMode: 'user' | 'environment' = 'env
 
 /**
  * Snaps a photo from the active video track using a canvas element.
- * Supports center-cropping for square (1:1) mode.
+ * Supports center-cropping for square (1:1) mode and digital zoom.
  */
-export function captureFrame(video: HTMLVideoElement, isSquare: boolean = false): HTMLCanvasElement {
+export function captureFrame(
+  video: HTMLVideoElement, 
+  isSquare: boolean = false,
+  zoom: number = 1
+): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   
   let sourceX = 0;
@@ -40,10 +44,20 @@ export function captureFrame(video: HTMLVideoElement, isSquare: boolean = false)
   let sourceWidth = video.videoWidth;
   let sourceHeight = video.videoHeight;
 
+  // Apply Digital Zoom if factor > 1
+  if (zoom > 1) {
+    const zoomedWidth = sourceWidth / zoom;
+    const zoomedHeight = sourceHeight / zoom;
+    sourceX = (sourceWidth - zoomedWidth) / 2;
+    sourceY = (sourceHeight - zoomedHeight) / 2;
+    sourceWidth = zoomedWidth;
+    sourceHeight = zoomedHeight;
+  }
+
   if (isSquare) {
     const size = Math.min(sourceWidth, sourceHeight);
-    sourceX = (sourceWidth - size) / 2;
-    sourceY = (sourceHeight - size) / 2;
+    sourceX += (sourceWidth - size) / 2;
+    sourceY += (sourceHeight - size) / 2;
     sourceWidth = size;
     sourceHeight = size;
     canvas.width = size;
