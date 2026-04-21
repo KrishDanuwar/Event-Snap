@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import AdminGuestList from '@/components/admin/AdminGuestList';
 import AdminLiveGallery from '@/components/admin/AdminLiveGallery';
 
