@@ -82,6 +82,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
   const toggleFlash = async () => {
     if (!stream || facingMode === 'user') return;
     const track = stream.getVideoTracks()[0];
+    if (!track) return;
     try {
       const capabilities = track.getCapabilities() as any;
       if (capabilities.torch) {
