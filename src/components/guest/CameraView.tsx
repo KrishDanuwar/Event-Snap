@@ -8,6 +8,7 @@ import { useGuestSession } from '@/hooks/useGuestSession';
 
 type TimerSeconds = 0 | 3 | 5 | 10;
 type FilterType = 'none' | 'grayscale(1)' | 'sepia(1)' | 'saturate(2)';
+type CameraMode = 'PHOTO' | 'SQUARE' | 'PORTRAIT';
 
 export default function CameraView({ eventId }: { eventId: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -16,6 +17,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
   const [flash, setFlash] = useState(false);
   const [timer, setTimer] = useState<TimerSeconds>(0);
   const [filter, setFilter] = useState<FilterType>('none');
+  const [mode, setMode] = useState<CameraMode>('PHOTO');
   const [countdown, setCountdown] = useState<number | null>(null);
   
   const [previewCanvas, setPreviewCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -65,16 +67,19 @@ export default function CameraView({ eventId }: { eventId: string }) {
   const handleCapture = () => {
     if (!videoRef.current || countdown !== null) return;
     
+    const snap = () => {
+       const canvas = captureFrame(videoRef.current!, mode === 'SQUARE');
+       setPreviewCanvas(canvas);
+       setCountdown(null);
+    };
+
     if (timer > 0) {
       setCountdown(timer);
       const interval = setInterval(() => {
         setCountdown(prev => {
           if (prev === null || prev <= 1) {
             clearInterval(interval);
-            // Execute capture
-            const canvas = captureFrame(videoRef.current!);
-            setPreviewCanvas(canvas);
-            setCountdown(null);
+            snap();
             return null;
           }
           if (window.navigator.vibrate) window.navigator.vibrate(20);
@@ -83,8 +88,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
       }, 1000);
     } else {
       if (window.navigator.vibrate) window.navigator.vibrate(50);
-      const canvas = captureFrame(videoRef.current);
-      setPreviewCanvas(canvas);
+      snap();
     }
   };
 
@@ -169,6 +173,15 @@ export default function CameraView({ eventId }: { eventId: string }) {
                  className="object-cover w-full h-full"
                />
                
+               {/* Square Mode Mask */}
+               {mode === 'SQUARE' && (
+                 <div className="absolute inset-0 z-20 pointer-events-none flex flex-col">
+                    <div className="flex-1 bg-black/60" />
+                    <div className="aspect-square w-full border-y border-white/20" />
+                    <div className="flex-1 bg-black/60" />
+                 </div>
+               )}
+
                {countdown !== null && (
                  <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
                     <span className="text-white text-8xl font-black drop-shadow-2xl animate-ping">
@@ -190,12 +203,14 @@ export default function CameraView({ eventId }: { eventId: string }) {
                </div>
              </>
           ) : (
-             <img 
-               src={previewCanvas.toDataURL('image/jpeg', 0.8)} 
-               alt="Preview" 
-               className="object-cover w-full h-full"
-               style={{ filter: filter }}
-             />
+             <div className="w-full h-full flex items-center justify-center bg-black">
+                <img 
+                  src={previewCanvas.toDataURL('image/jpeg', 0.8)} 
+                  alt="Preview" 
+                  style={{ filter: filter }}
+                  className={`object-cover ${mode === 'SQUARE' ? 'aspect-square w-full' : 'w-full h-full'}`}
+                />
+             </div>
           )}
 
           {error && !isUploading && (
@@ -206,7 +221,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
           )}
        </div>
 
-       {/* Top Utility Bar (Updated) */}
+       {/* Top Utility Bar */}
        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent flex items-center justify-between px-6 pt-4 text-white z-40">
           <button 
             onClick={toggleFlash}
@@ -236,10 +251,16 @@ export default function CameraView({ eventId }: { eventId: string }) {
        )}
 
        {/* Mode Selector */}
-       <div className="absolute bottom-28 left-0 right-0 flex justify-center items-center gap-6 text-[11px] font-bold tracking-widest text-white/50 z-40 overflow-hidden px-10">
-          <span className="flex-shrink-0 opacity-40">PORTRAIT</span>
-          <span className="flex-shrink-0 text-[#FFD60A] scale-110 transition-transform">PHOTO</span>
-          <span className="flex-shrink-0 opacity-40">SQUARE</span>
+       <div className="absolute bottom-28 left-0 right-0 flex justify-center items-center gap-6 text-[11px] font-bold tracking-widest z-40 overflow-hidden px-10">
+          {['PORTRAIT', 'PHOTO', 'SQUARE'].map((m) => (
+             <button
+               key={m}
+               onClick={() => setMode(m as CameraMode)}
+               className={`flex-shrink-0 transition-all duration-300 ${mode === m ? 'text-[#FFD60A] scale-110' : 'text-white/40'}`}
+             >
+               {m}
+             </button>
+          ))}
        </div>
 
        {/* Shutter Center */}

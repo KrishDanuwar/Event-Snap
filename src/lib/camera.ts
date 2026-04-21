@@ -30,11 +30,29 @@ export async function initializeCamera(facingMode: 'user' | 'environment' = 'env
 
 /**
  * Snaps a photo from the active video track using a canvas element.
+ * Supports center-cropping for square (1:1) mode.
  */
-export function captureFrame(video: HTMLVideoElement): HTMLCanvasElement {
+export function captureFrame(video: HTMLVideoElement, isSquare: boolean = false): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceWidth = video.videoWidth;
+  let sourceHeight = video.videoHeight;
+
+  if (isSquare) {
+    const size = Math.min(sourceWidth, sourceHeight);
+    sourceX = (sourceWidth - size) / 2;
+    sourceY = (sourceHeight - size) / 2;
+    sourceWidth = size;
+    sourceHeight = size;
+    canvas.width = size;
+    canvas.height = size;
+  } else {
+    canvas.width = sourceWidth;
+    canvas.height = sourceHeight;
+  }
+
   const ctx = canvas.getContext('2d');
   
   if (ctx) {
@@ -43,7 +61,11 @@ export function captureFrame(video: HTMLVideoElement): HTMLCanvasElement {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
      }
-     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+     ctx.drawImage(
+        video, 
+        sourceX, sourceY, sourceWidth, sourceHeight, 
+        0, 0, canvas.width, canvas.height
+     );
   }
   return canvas;
 }
