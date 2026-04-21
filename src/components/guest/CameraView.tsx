@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Zap, Timer, RefreshCw, CircleDashed } from 'lucide-react';
+import { Zap, Timer, RefreshCw, CircleDashed, ZapOff } from 'lucide-react';
 import { initializeCamera, captureFrame } from '@/lib/camera';
 import { uploadPhoto } from '@/lib/upload';
 import { useGuestSession } from '@/hooks/useGuestSession';
@@ -10,6 +10,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [flash, setFlash] = useState(false);
   
   const [previewCanvas, setPreviewCanvas] = useState<HTMLCanvasElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -19,30 +20,53 @@ export default function CameraView({ eventId }: { eventId: string }) {
   
   const { session, guestDetails, incrementPhotoCount } = useGuestSession(eventId);
 
+  // Setup/Switch Camera
   useEffect(() => {
+    let isMounted = true;
+    
     async function setupCamera() {
       try {
+        // Stop current stream tracks before switching
         if (stream) {
           stream.getTracks().forEach(t => t.stop());
         }
+        
+        // Brief delay to allow hardware to release (helps on some mobile devices)
+        await new Promise(r => setTimeout(r, 100));
+
         const mediaStream = await initializeCamera(facingMode);
+        
+        if (!isMounted) {
+          mediaStream.getTracks().forEach(t => t.stop());
+          return;
+        }
+
         setStream(mediaStream);
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
+        
+        // Reset flash state when switching cameras
+        setFlash(false);
       } catch (err: any) {
-        setError('Camera access failed. Please ensure you have granted camera permissions.');
+        console.error(err);
+        setError('Camera access failed. Please ensure permissions are granted.');
       }
     }
     setupCamera();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
+      isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facingMode]);
+
+  // Ensure stream is attached when video element remounts (fixes retake blank screen)
+  useEffect(() => {
+    if (videoRef.current && stream && !previewCanvas) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, previewCanvas]);
 
   const handleCapture = () => {
     if (!videoRef.current) return;
@@ -53,6 +77,25 @@ export default function CameraView({ eventId }: { eventId: string }) {
 
   const handleFlip = () => {
      setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  const toggleFlash = async () => {
+    if (!stream || facingMode === 'user') return;
+    const track = stream.getVideoTracks()[0];
+    try {
+      const capabilities = track.getCapabilities() as any;
+      if (capabilities.torch) {
+        const newFlash = !flash;
+        await track.applyConstraints({
+          advanced: [{ torch: newFlash }]
+        } as any);
+        setFlash(newFlash);
+      } else {
+        alert('Flash (torch) is not supported on this device/camera.');
+      }
+    } catch (err) {
+      console.error('Flash toggle failed:', err);
+    }
   };
 
   const handleRetake = () => {
@@ -104,14 +147,14 @@ export default function CameraView({ eventId }: { eventId: string }) {
                
                {/* 3x3 Grid Overlay */}
                <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none z-10">
-                  <div className="border-r border-b border-white/20" />
-                  <div className="border-r border-b border-white/20" />
-                  <div className="border-b border-white/20" />
-                  <div className="border-r border-b border-white/20" />
-                  <div className="border-r border-b border-white/20" />
-                  <div className="border-b border-white/20" />
-                  <div className="border-r border-white/20" />
-                  <div className="border-r border-white/20" />
+                  <div className="border-r border-b border-white/10" />
+                  <div className="border-r border-b border-white/10" />
+                  <div className="border-b border-white/10" />
+                  <div className="border-r border-b border-white/10" />
+                  <div className="border-r border-b border-white/10" />
+                  <div className="border-b border-white/10" />
+                  <div className="border-r border-white/10" />
+                  <div className="border-r border-white/10" />
                   <div />
                </div>
              </>
@@ -139,7 +182,13 @@ export default function CameraView({ eventId }: { eventId: string }) {
 
        {/* Top Utility Bar (iOS Camera Style) */}
        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent flex items-center justify-between px-6 pt-4 text-white z-40">
-          <Zap size={20} fill="currentColor" className="opacity-90" />
+          <button 
+            onClick={toggleFlash}
+            disabled={facingMode === 'user'}
+            className={`transition-colors ${flash ? 'text-[#FFD60A]' : 'text-white'} disabled:opacity-30`}
+          >
+            {flash ? <Zap size={20} fill="currentColor" /> : <ZapOff size={20} />}
+          </button>
           <span className="text-[10px] font-bold tracking-tighter opacity-90">HDR</span>
           <CircleDashed size={20} className="opacity-90" />
           <Timer size={20} className="opacity-90" />
@@ -161,10 +210,8 @@ export default function CameraView({ eventId }: { eventId: string }) {
 
        {/* Mode Selector */}
        <div className="absolute bottom-28 left-0 right-0 flex justify-center items-center gap-6 text-[11px] font-bold tracking-widest text-white/50 z-40 overflow-hidden px-10">
-          <span className="flex-shrink-0 opacity-40">SLO-MO</span>
-          <span className="flex-shrink-0 opacity-40">VIDEO</span>
-          <span className="flex-shrink-0 text-[#FFD60A] scale-110 transition-transform">PHOTO</span>
           <span className="flex-shrink-0 opacity-40">PORTRAIT</span>
+          <span className="flex-shrink-0 text-[#FFD60A] scale-110 transition-transform">PHOTO</span>
           <span className="flex-shrink-0 opacity-40">SQUARE</span>
        </div>
 
