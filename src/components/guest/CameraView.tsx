@@ -123,6 +123,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
     
     if (stream && facingMode === 'environment') {
        const track = stream.getVideoTracks()[0];
+       if (!track) return;
        try {
           const capabilities = track.getCapabilities() as any;
           if (capabilities.zoom) {
