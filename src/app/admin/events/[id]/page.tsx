@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AdminGuestList from '@/components/admin/AdminGuestList';
 import AdminLiveGallery from '@/components/admin/AdminLiveGallery';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
 
 export default function AdminEventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: eventId } = use(params);
   const [event, setEvent] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'gallery' | 'analytics'>('gallery');
   const router = useRouter();
 
   useEffect(() => {
@@ -135,11 +137,33 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
          </div>
       </div>
       
-      {/* Admin Realtime Dashboards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <AdminGuestList eventId={eventId} />
-         <AdminLiveGallery eventId={eventId} />
+      {/* Dashboard Tabs */}
+      <div className="flex gap-8 border-b border-neutral-100 mb-6">
+         <button 
+           onClick={() => setActiveTab('gallery')}
+           className={`pb-4 px-2 text-sm font-bold transition-all relative ${activeTab === 'gallery' ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
+         >
+           Live Gallery
+           {activeTab === 'gallery' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full animate-in fade-in slide-in-from-left-2" />}
+         </button>
+         <button 
+           onClick={() => setActiveTab('analytics')}
+           className={`pb-4 px-2 text-sm font-bold transition-all relative ${activeTab === 'analytics' ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
+         >
+           Analytics & Insights
+           {activeTab === 'analytics' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full animate-in fade-in slide-in-from-left-2" />}
+         </button>
       </div>
+      
+      {/* Tab Content */}
+      {activeTab === 'gallery' ? (
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <AdminGuestList eventId={eventId} />
+            <AdminLiveGallery eventId={eventId} />
+         </div>
+      ) : (
+         <AdminAnalytics eventId={eventId} />
+      )}
 
     </div>
   );

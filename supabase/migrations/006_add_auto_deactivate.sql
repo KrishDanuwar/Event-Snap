@@ -1,0 +1,2 @@
+ALTER TABLE events ADD COLUMN auto_deactivate BOOLEAN DEFAULT true;
+ALTER TABLE events ADD COLUMN deactivates_at TIMESTAMPTZ DEFAULT NULL;

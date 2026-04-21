@@ -26,6 +26,8 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ id: st
   // Local state for real-time preview
   const [name, setName] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
+  const [autoDeactivate, setAutoDeactivate] = useState(true);
+  const [deactivatesAt, setDeactivatesAt] = useState('');
   const [logoPath, setLogoPath] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [theme, setTheme] = useState<EventTheme>({
@@ -45,6 +47,10 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ id: st
         setEvent(data.event);
         setName(data.event.name);
         setWelcomeMessage(data.event.welcome_message || '');
+        setAutoDeactivate(data.event.auto_deactivate ?? true);
+        if (data.event.deactivates_at) {
+          setDeactivatesAt(new Date(data.event.deactivates_at).toISOString().slice(0, 16));
+        }
         setLogoPath(data.event.logo_path);
         setTheme({
           ...theme,
@@ -73,6 +79,8 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ id: st
         body: JSON.stringify({
           name,
           welcome_message: welcomeMessage,
+          auto_deactivate: autoDeactivate,
+          deactivates_at: deactivatesAt ? new Date(deactivatesAt).toISOString() : null,
           logo_path: logoPath,
           theme
         })
@@ -133,6 +141,28 @@ export default function AdminSettingsPage({ params }: { params: Promise<{ id: st
                         rows={3}
                         className="w-full bg-neutral-50 border-neutral-100 rounded-xl p-4 font-medium outline-blue-500 text-sm"
                       />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">Event End Time (Auto-Close)</label>
+                      <input 
+                        type="datetime-local" 
+                        value={deactivatesAt} 
+                        onChange={(e) => setDeactivatesAt(e.target.value)}
+                        className="w-full h-12 bg-neutral-50 border-neutral-100 rounded-xl px-4 font-semibold outline-blue-500"
+                      />
+                   </div>
+                   <div className="flex items-center gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
+                      <input 
+                        type="checkbox" 
+                        id="autoDeactivate" 
+                        checked={autoDeactivate} 
+                        onChange={(e) => setAutoDeactivate(e.target.checked)}
+                        className="w-5 h-5 accent-blue-600 rounded cursor-pointer"
+                      />
+                      <label htmlFor="autoDeactivate" className="text-sm font-bold cursor-pointer select-none">
+                         Auto-deactivate on expiry
+                         <span className="block text-[10px] font-medium text-neutral-500">Event will automatically close to new uploads when time runs out.</span>
+                      </label>
                    </div>
                 </div>
              </section>

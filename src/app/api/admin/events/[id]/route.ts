@@ -25,7 +25,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const supabaseAdmin = createAdminClient();
     
     // Only allow specific updates to avoid hijacking
-    const allowedUpdates = ['name', 'expires_at', 'welcome_message', 'max_guests', 'theme', 'logo_path', 'is_active'];
+    const allowedUpdates = ['name', 'expires_at', 'welcome_message', 'max_guests', 'theme', 'logo_path', 'is_active', 'auto_deactivate', 'deactivates_at'];
     const updatePayload: any = {};
     
     allowedUpdates.forEach(key => {

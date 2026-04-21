@@ -23,7 +23,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, expires_at, welcome_message, max_guests, theme, logo_path } = body;
+    const { name, expires_at, welcome_message, max_guests, theme, logo_path, auto_deactivate, deactivates_at } = body;
 
     if (!name || !expires_at) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -45,7 +45,9 @@ export async function POST(request: Request) {
            textMode: 'light',
            fontFamily: 'Inter'
         },
-        logo_path
+        logo_path,
+        auto_deactivate: auto_deactivate !== undefined ? auto_deactivate : true,
+        deactivates_at
       })
       .select('id')
       .single();

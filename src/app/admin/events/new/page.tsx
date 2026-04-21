@@ -18,6 +18,8 @@ export default function NewEventPage() {
   const [name, setName] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const [expiresInDays, setExpiresInDays] = useState(3);
+  const [deactivatesAt, setDeactivatesAt] = useState('');
+  const [autoDeactivate, setAutoDeactivate] = useState(true);
   
   // Theme State
   const [theme, setTheme] = useState<EventTheme>({
@@ -47,6 +49,8 @@ export default function NewEventPage() {
             name,
             welcome_message: welcomeMessage,
             expires_at: expiryDate.toISOString(),
+            deactivates_at: deactivatesAt ? new Date(deactivatesAt).toISOString() : null,
+            auto_deactivate: autoDeactivate,
             theme
          })
       });
@@ -84,15 +88,40 @@ export default function NewEventPage() {
                         <label className="block text-sm font-semibold mb-1">Welcome Message</label>
                         <input type="text" value={welcomeMessage} onChange={e => setWelcomeMessage(e.target.value)} className="w-full border rounded-lg p-3 text-sm focus:ring-2 ring-red-500 outline-none" placeholder="Drop a photo to share the love!" />
                      </div>
-                     <div>
-                        <label className="block text-sm font-semibold mb-1">Retention Duration</label>
-                        <select value={expiresInDays} onChange={e => setExpiresInDays(Number(e.target.value))} className="w-full border rounded-lg p-3 text-sm focus:ring-2 ring-red-500 outline-none">
-                           <option value={1}>24 Hours</option>
-                           <option value={3}>3 Days</option>
-                           <option value={7}>7 Days</option>
-                        </select>
-                        <p className="text-xs text-neutral-400 mt-1">All JPEGs completely delete immediately after this duration concludes.</p>
-                     </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                            <label className="block text-sm font-semibold mb-1 text-red-600">Event End Time (Auto-Close)</label>
+                            <input 
+                               type="datetime-local" 
+                               value={deactivatesAt} 
+                               onChange={e => setDeactivatesAt(e.target.value)} 
+                               className="w-full border rounded-lg p-3 text-sm focus:ring-2 ring-red-500 outline-none" 
+                            />
+                            <p className="text-[10px] text-neutral-400 mt-1 italic">Guests won't be able to upload after this time.</p>
+                         </div>
+                         <div>
+                            <label className="block text-sm font-semibold mb-1">Retention Duration</label>
+                            <select value={expiresInDays} onChange={e => setExpiresInDays(Number(e.target.value))} className="w-full border rounded-lg p-3 text-sm focus:ring-2 ring-red-500 outline-none">
+                               <option value={1}>24 Hours</option>
+                               <option value={3}>3 Days</option>
+                               <option value={7}>7 Days</option>
+                            </select>
+                            <p className="text-[10px] text-neutral-400 mt-1 italic">All JPEGs completely delete after this duration.</p>
+                         </div>
+                      </div>
+                      <div className="flex items-center gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
+                         <input 
+                            type="checkbox" 
+                            id="autoDeactivate" 
+                            checked={autoDeactivate} 
+                            onChange={e => setAutoDeactivate(e.target.checked)}
+                            className="w-5 h-5 accent-red-600 rounded cursor-pointer"
+                         />
+                         <label htmlFor="autoDeactivate" className="text-sm font-bold cursor-pointer select-none">
+                            Auto-deactivate on expiry
+                            <span className="block text-[10px] font-medium text-neutral-500">Event will automatically close to new uploads when time runs out.</span>
+                         </label>
+                      </div>
                   </div>
                </section>
 
