@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Zap, Timer, RefreshCw, CircleDashed } from 'lucide-react';
 import { initializeCamera, captureFrame } from '@/lib/camera';
 import { uploadPhoto } from '@/lib/upload';
 import { useGuestSession } from '@/hooks/useGuestSession';
@@ -30,7 +31,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
           videoRef.current.srcObject = mediaStream;
         }
       } catch (err: any) {
-        setError('Camera access failed. Please ensure you have granted camera permissions and that your camera is not in use by another app.');
+        setError('Camera access failed. Please ensure you have granted camera permissions.');
       }
     }
     setupCamera();
@@ -76,7 +77,6 @@ export default function CameraView({ eventId }: { eventId: string }) {
 
     if (success) {
       incrementPhotoCount();
-      // Side effect for the iOS "Last photo" bubble
       setLastPhotoUrl(previewCanvas.toDataURL('image/jpeg', 0.2));
       setPreviewCanvas(null);
       setUploadProgress(0);
@@ -87,19 +87,34 @@ export default function CameraView({ eventId }: { eventId: string }) {
   };
 
   return (
-    <div className="relative flex-1 flex flex-col bg-black overflow-hidden select-none">
+    <div className="relative flex-1 flex flex-col bg-black overflow-hidden select-none touch-none">
        
        {/* Camera Viewport */}
        <div className="flex-1 relative w-full h-full flex items-center justify-center">
           {!previewCanvas ? (
-             <video 
-               ref={videoRef}
-               autoPlay 
-               playsInline 
-               muted 
-               style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
-               className="object-cover w-full h-full"
-             />
+             <>
+               <video 
+                 ref={videoRef}
+                 autoPlay 
+                 playsInline 
+                 muted 
+                 style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+                 className="object-cover w-full h-full"
+               />
+               
+               {/* 3x3 Grid Overlay */}
+               <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none z-10">
+                  <div className="border-r border-b border-white/20" />
+                  <div className="border-r border-b border-white/20" />
+                  <div className="border-b border-white/20" />
+                  <div className="border-r border-b border-white/20" />
+                  <div className="border-r border-b border-white/20" />
+                  <div className="border-b border-white/20" />
+                  <div className="border-r border-white/20" />
+                  <div className="border-r border-white/20" />
+                  <div />
+               </div>
+             </>
           ) : (
              // eslint-disable-next-line @next/next/no-img-element
              <img 
@@ -110,7 +125,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
           )}
 
           {error && !isUploading && (
-            <div className="absolute top-1/2 left-10 right-10 -translate-y-1/2 z-20 bg-white shadow-2xl text-red-600 p-6 rounded-3xl text-center font-bold animate-fade-in">
+            <div className="absolute top-1/2 left-10 right-10 -translate-y-1/2 z-50 bg-white/90 backdrop-blur-xl shadow-2xl text-red-600 p-6 rounded-3xl text-center font-bold animate-fade-in border border-white/20">
               {error}
               <button 
                 onClick={() => setError('')}
@@ -122,40 +137,65 @@ export default function CameraView({ eventId }: { eventId: string }) {
           )}
        </div>
 
-       {/* Top Utility Bar (Premium Light) */}
-       <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/20 to-transparent flex items-center justify-between px-6 pt-4">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-            <span className="text-white text-xs font-bold tracking-widest uppercase opacity-80">Live</span>
+       {/* Top Utility Bar (iOS Camera Style) */}
+       <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent flex items-center justify-between px-6 pt-4 text-white z-40">
+          <Zap size={20} fill="currentColor" className="opacity-90" />
+          <span className="text-[10px] font-bold tracking-tighter opacity-90">HDR</span>
+          <CircleDashed size={20} className="opacity-90" />
+          <Timer size={20} className="opacity-90" />
+          <div className="flex -space-x-1 opacity-90">
+             <div className="w-3 h-3 rounded-full border border-white/60 bg-white/10" />
+             <div className="w-3 h-3 rounded-full border border-white/60 bg-white/20" />
+             <div className="w-3 h-3 rounded-full border border-white/60 bg-white/30" />
           </div>
-          <button 
-            onClick={handleFlip} 
-            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white"
-          >
-            🔄
-          </button>
+       </div>
+
+       {/* Zoom Indicator (1x) */}
+       {!previewCanvas && (
+         <div className="absolute bottom-40 left-1/2 -translate-x-1/2 z-40">
+            <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-[10px] font-bold text-white">
+                1x
+            </div>
+         </div>
+       )}
+
+       {/* Mode Selector */}
+       <div className="absolute bottom-28 left-0 right-0 flex justify-center items-center gap-6 text-[11px] font-bold tracking-widest text-white/50 z-40 overflow-hidden px-10">
+          <span className="flex-shrink-0 opacity-40">SLO-MO</span>
+          <span className="flex-shrink-0 opacity-40">VIDEO</span>
+          <span className="flex-shrink-0 text-[#FFD60A] scale-110 transition-transform">PHOTO</span>
+          <span className="flex-shrink-0 opacity-40">PORTRAIT</span>
+          <span className="flex-shrink-0 opacity-40">SQUARE</span>
        </div>
 
        {/* iPhone Style Shutter Control Center */}
-       <div className="absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-black/40 to-transparent flex items-center justify-between px-8 pb-10">
+       <div className="absolute bottom-0 left-0 right-0 h-28 bg-black/60 backdrop-blur-sm flex items-center justify-between px-10 pb-6 z-40">
           
-          {/* Recent Photo Preview */}
-          <div className="w-12 h-12 rounded-lg bg-neutral-800 border border-white/20 overflow-hidden shadow-inner flex items-center justify-center">
-             {lastPhotoUrl && (
-               // eslint-disable-next-line @next/next/no-img-element
-               <img src={lastPhotoUrl} alt="Last" className="w-full h-full object-cover" />
-             )}
+          {/* Recent Photo Preview / Count */}
+          <div className="relative group">
+            <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center transition-transform active:scale-95">
+               {lastPhotoUrl ? (
+                 // eslint-disable-next-line @next/next/no-img-element
+                 <img src={lastPhotoUrl} alt="Last" className="w-full h-full object-cover" />
+               ) : (
+                 <div className="text-[10px] font-black text-white/40">{guestDetails?.photoCount || 0}/25</div>
+               )}
+            </div>
+            {lastPhotoUrl && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full border-2 border-black flex items-center justify-center text-[8px] font-bold text-white">
+                {guestDetails?.photoCount || 0}
+              </div>
+            )}
           </div>
 
           {!previewCanvas ? (
             // The iOS Shutter
             <div className="relative flex items-center justify-center">
-               {/* Progress Ring */}
                {uploadProgress > 0 && (
                   <svg className="absolute w-24 h-24 -rotate-90">
                     <circle 
                       cx="48" cy="48" r="44" 
-                      stroke="white" strokeWidth="4" fill="transparent" 
+                      stroke="#FFD60A" strokeWidth="4" fill="transparent" 
                       strokeDasharray={276}
                       strokeDashoffset={276 - (276 * uploadProgress / 100)}
                       className="transition-all duration-200"
@@ -165,30 +205,30 @@ export default function CameraView({ eventId }: { eventId: string }) {
                <button 
                  onClick={handleCapture}
                  disabled={guestDetails ? guestDetails.photoCount >= 25 : false}
-                 className="w-20 h-20 rounded-full border-[6px] border-white p-1 active:scale-90 transition-transform disabled:opacity-30"
+                 className="w-20 h-20 rounded-full border-[4px] border-white p-1.5 active:scale-95 transition-all disabled:opacity-30"
                >
                   <div className="w-full h-full bg-white rounded-full" />
                </button>
             </div>
           ) : (
             // Post-Capture Controls
-            <div className="flex-1 flex gap-4 pl-4">
+            <div className="flex-1 flex gap-4 pl-4 px-2">
               <button 
                 onClick={handleRetake}
                 disabled={isUploading}
-                className="flex-1 h-14 rounded-2xl bg-white/20 backdrop-blur-lg text-white font-bold disabled:opacity-50"
+                className="flex-1 h-12 rounded-xl bg-white/10 backdrop-blur-lg text-white text-sm font-bold disabled:opacity-50 border border-white/10 active:scale-95 transition-transform"
               >
                 Retake
               </button>
               <button 
                 onClick={handleKeep}
                 disabled={isUploading}
-                className="flex-[2] h-14 rounded-2xl bg-white text-black font-extrabold shadow-xl disabled:opacity-50 relative overflow-hidden"
+                className="flex-[2] h-12 rounded-xl bg-white text-black text-sm font-extrabold shadow-xl disabled:opacity-50 relative overflow-hidden active:scale-95 transition-transform"
               >
                 {isUploading ? 'Sending...' : 'Keep Photo'}
                 {isUploading && (
                    <div 
-                    className="absolute left-0 bottom-0 top-0 bg-sky-500/20 transition-all" 
+                    className="absolute left-0 bottom-0 top-0 bg-blue-500/20 transition-all" 
                     style={{ width: `${uploadProgress}%` }}
                    />
                 )}
@@ -196,11 +236,14 @@ export default function CameraView({ eventId }: { eventId: string }) {
             </div>
           )}
 
-          {/* Placeholder for symmetry / info */}
-          <div className="w-12 h-12 flex flex-col items-center justify-center opacity-70">
-             <span className="text-[10px] font-black text-white">{guestDetails?.photoCount || 0}</span>
-             <span className="text-[8px] text-white opacity-50 uppercase font-bold">Photos</span>
-          </div>
+          {/* Camera Flip */}
+          <button 
+            onClick={handleFlip} 
+            disabled={!!previewCanvas || isUploading}
+            className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white border border-white/5 active:rotate-180 transition-all duration-500 disabled:opacity-30"
+          >
+            <RefreshCw size={24} />
+          </button>
        </div>
     </div>
   );
