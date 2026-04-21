@@ -30,7 +30,7 @@ export default function CameraView({ eventId }: { eventId: string }) {
           videoRef.current.srcObject = mediaStream;
         }
       } catch (err: any) {
-        setError('Camera flip failed. Some devices only support one camera or require permission.');
+        setError('Camera access failed. Please ensure you have granted camera permissions and that your camera is not in use by another app.');
       }
     }
     setupCamera();

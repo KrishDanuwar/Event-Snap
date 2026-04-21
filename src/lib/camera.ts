@@ -7,16 +7,25 @@ export async function initializeCamera(facingMode: 'user' | 'environment' = 'env
     throw new Error('Camera API not supported or secured properly context');
   }
 
-  const stream = await navigator.mediaDevices.getUserMedia({
+  const constraints: MediaStreamConstraints = {
     video: {
-      facingMode: { exact: facingMode }, 
-      width:  { ideal: 3840 },
-      height: { ideal: 2160 },
+      facingMode: facingMode, 
+      width:  { ideal: 1920 },
+      height: { ideal: 1080 },
     },
     audio: false,
-  });
+  };
 
-  return stream;
+  try {
+    return await navigator.mediaDevices.getUserMedia(constraints);
+  } catch (err) {
+    console.error('Camera initialization failed, trying fallback:', err);
+    // Fallback to basic video if complex constraints fail
+    return await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+  }
 }
 
 /**

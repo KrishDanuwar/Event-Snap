@@ -14,13 +14,24 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
     await sharePhoto(photo.url, `EventSnap_${photo.id}.jpg`);
   };
 
-  const handleDownload = () => {
-    const a = document.createElement('a');
-    a.href = photo.url;
-    a.download = `EventSnap_${photo.id}.jpg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(photo.url);
+      if (!response.ok) throw new Error('Download failed');
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `EventSnap_${photo.id}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+      alert('Failed to download photo. Please try long-pressing the image to save.');
+    }
   };
 
   const handleDelete = async () => {
